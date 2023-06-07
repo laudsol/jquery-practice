@@ -1,28 +1,53 @@
 $(document).ready(() => {
-    // grabs the element with ID starting-point
-    const startingElement = $("#starting-point");
-    // creates a new div 
-    const siblingElement = $("<div></div>");
-    // adds test tp the new div
-    siblingElement.text("This is the next part");
-    // appends the new div to startingElement
-    startingElement.after(siblingElement);
-
-
-    const favoriteFoods = $("#favorite-foods");
-    favoriteFoods.css('background-color', 'purple');
+    const favoriteFoods = $("#favorite-foods")
+        .css('background-color', 'purple');
 
     const favs = [
         {food: 'pizza', color: 'green'},
         {food: 'falafel', color: 'yellow'},
         {food: 'bolani', color: 'red'},
-        {food: 'hot dog', color: 'orange'}
+        {food: 'burger', color: 'orange'}
     ];
 
+    let totalCount = 0;
+    const orderCounter =  $("<div></div>")
+        .text(`total food: ${totalCount}`)
+
+    $('#starting-point').after(orderCounter);
+
     favs.forEach(fav => {
-        let favFood = $("<div></div>")
-            .text(fav.food)
-            .css('background-color', fav.color);
-        favoriteFoods.after(favFood);
-    });
+        let itemCounter = 0;
+    
+        const foodBox = $("<div></div>")
+            .css(
+                    {
+                        'border-style': 'solid',
+                        'background-color': fav.color
+                    }
+            );
+        
+        const foodName = $("<div></div>")
+            .text(fav.food);
+    
+        const count = $("<div></div>")
+            .text(`quantity: ${itemCounter}`);
+    
+        const button = $("<button></button>")
+            .text('Add Item')
+            .on('click' , () => {
+                itemCounter += 1;
+                count.text(`quantity: ${itemCounter}`);
+                
+                totalCount += 1;
+                orderCounter.text(`total food: ${totalCount}`);
+            });
+            
+        foodBox.append(foodName);
+        foodBox.append(count);
+        foodBox.append(button);
+        
+        favoriteFoods.after(foodBox);
+
+    })
+
 });
