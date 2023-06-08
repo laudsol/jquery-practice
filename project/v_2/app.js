@@ -79,7 +79,6 @@ $( document ).ready(function() {
         itemBox.append(removeButton);
         $('#menu').append(itemBox);
     });
-
     
 });
 
@@ -116,4 +115,6 @@ const getRestaurantData = () => {
             details: ['rice', 'bread', 'yogurt']
         },
     }
+
+    
 }

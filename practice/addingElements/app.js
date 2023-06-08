@@ -49,5 +49,4 @@ $(document).ready(() => {
         favoriteFoods.after(foodBox);
 
     })
-
 });
