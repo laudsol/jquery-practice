@@ -1,23 +1,21 @@
 $(document).ready(() => {
+    const $foodCounterContainer = $("<div></div>");
+    const $buttonContainer = $("<div></div>");
     let foods = ['pizza', 'tacos', 'falafel', 'biryani', 'kabob', 'bolani'];
-
     let foodState = foods.reduce((prev, curr) => {
          prev[curr] = 0;
         return prev;
     }, {});
 
-    const foodCounterContainer = $("<div></div>");
-    $("#start").after(foodCounterContainer);    
-    
-    const buttonContainer = $("<div></div>");
-    foodCounterContainer.after(buttonContainer);   
+    $("#start").after($foodCounterContainer);    
+    $foodCounterContainer.after($buttonContainer);
 
     foods.forEach(food => {
         const foodCounter = getFoodCounterElement(food);
-        foodCounterContainer.append(foodCounter);
+        $foodCounterContainer.append(foodCounter);
         
         const foodButton = getFoodButtonElement(food);
-        buttonContainer.append(foodButton);
+        $buttonContainer.append(foodButton);
     });
     
     function getFoodCounterElement(food) {

@@ -1,20 +1,20 @@
-$( document ).ready(function() {
-    const data = getRestaurantData();
+$(document).ready(function() {
+    const dataObj = getRestaurantData();
 
-    const orderBox = $("<div></div>")   
+    const $orderBox = $("<div></div>")   
         .text('Your order');
     
-    const orderObj = Object.keys(data).reduce((prev, curr) => {
+    const orderObj = Object.keys(dataObj).reduce((prev, curr) => {
         prev[curr] = 0;
         return prev;
     }, {});
 
-    Object.keys(data).forEach(item => {
+    Object.keys(dataObj).forEach(item => {
         const orderItem =  $("<div></div>")   
             .text(`${item}: ${orderObj[item]}`)
             .attr('id', `order-item-${item}`);
 
-        orderBox.append(orderItem);
+        $orderBox.append(orderItem);
     });
     
     const getTotalPrice = (orders, menuObj) => {
@@ -26,58 +26,58 @@ $( document ).ready(function() {
         }, 0);
     }
     
-    let totalPrice = getTotalPrice(orderObj, data);
+    let totalPrice = getTotalPrice(orderObj, dataObj);
 
     const priceDisplay = $("<div></div>")
         .text(`Total price: ${totalPrice}`);
 
-    $('#menu').append(orderBox);
+    $('#menu').append($orderBox);
     $('#menu').append(priceDisplay);
 
     
-    Object.keys(data).forEach(item => {
-        const menuItem = data[item];
+    Object.keys(dataObj).forEach(item => {
+        const menuItem = dataObj[item];
         const detailsString = menuItem.details.reduce((prev, curr) => {
             return `${prev} ${curr}`;
         }, "");
 
-        let itemBox = $("<div></div>")
+        let $itemBox = $("<div></div>")
             .css("border-style", "solid");
-        let foodName = $("<div></div>")
+        let $foodName = $("<div></div>")
             .text(item);
-        let price = $("<div></div>")
+        let $price = $("<div></div>")
             .text(`Price ${menuItem.price}`);
-        let details = $("<div></div>")
+        let $details = $("<div></div>")
             .text(`Includes: ${detailsString}`);
-        let addButton = $("<button></button>")
+        let $addButton = $("<button></button>")
             .text('Add')
             .on('click', () => {
                 if (orderObj[item] < menuItem.inStock) {
                     orderObj[item] += 1;
                     $(`#order-item-${item}`).text(`${item}: ${orderObj[item]}`);
-                    priceDisplay.text(`Total price: ${getTotalPrice(orderObj, data)}`);
+                    priceDisplay.text(`Total price: ${getTotalPrice(orderObj, dataObj)}`);
                 } else {
                     alert(`Sorry! We're all sold out of ${item}`)
                 }
             });
-        let removeButton = $("<button></button>")
+        let $removeButton = $("<button></button>")
             .text('Remove')
             .on('click', () => {
                 if (orderObj[item] > 0) {
                     orderObj[item] -= 1;
                     $(`#order-item-${item}`).text(`${item}: ${orderObj[item]}`);
-                    priceDisplay.text(`Total price: ${getTotalPrice(orderObj, data)}`);
+                    priceDisplay.text(`Total price: ${getTotalPrice(orderObj, dataObj)}`);
                 } else {
                     alert(`You have no ${item} in your cart!`)
                 }
         });
 
-        itemBox.append(foodName);
-        itemBox.append(price);
-        itemBox.append(details);
-        itemBox.append(addButton);
-        itemBox.append(removeButton);
-        $('#menu').append(itemBox);
+        $itemBox.append($foodName);
+        $itemBox.append($price);
+        $itemBox.append($details);
+        $itemBox.append($addButton);
+        $itemBox.append($removeButton);
+        $('#menu').append($itemBox);
     });
     
 });
