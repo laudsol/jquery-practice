@@ -4,20 +4,68 @@ $(document).ready(function() {
         username: 'student',
         password: '5050'
     }
-    const orderObj = Object.keys(dataObj).reduce((prev, curr) => {
-        prev[curr] = {
-            sideDish: '',
-            quantity: 0
-        };
+    const mainOrderObj = Object.keys(dataObj).reduce((prev, curr) => {
+        prev[curr] = 0
         return prev;
     }, {});
+
+    const tipOptions = [0.05, 0.1, 0.15, 0.2, 0.25];
+    let selectedTip = 0;
 
     createOrderSummary();
     createMenu();
     createLoginModal()
+    createCheckoutModal()
+
+    function createCheckoutModal() {
+        const checkoutButton = $('<button></button>')
+            .text('Checkout')
+            .on('click', () => {
+                // checkoutModal.append('<p></p>').text(`Total ${getTotalPrice(mainOrderObj, dataObj) * (1 + selectedTip)}`);
+            });
+        const checkoutModal = $('#checkout');
+        const checkoutForm = createCheckoutForm();
+        const nameLabel = $('<label></label>').text('Name');
+        const nameInput = $('<input></input>').attr('id', 'name-input');
+        const phoneLabel = $('<label></label>').text('Phone Number');
+        const phoneInput = $('<input></input>').attr('id', 'phone-input');
+        const tipLabel = $('<label></label>').attr('for', 'tips'). text('Add a tip');
+        const tipSelection = $('<select></select>').attr('name', 'tips').attr('id', 'tips');
+        const payButton = $('<button></button>').text('Pay Now');
+        const backButton = $('<button></button>').text('Back To Order');
+
+        tipOptions.forEach(tip => {
+            let tipOption = $("<option></option>")
+                .attr('value', tip)
+                .text(`${tip*100}%`);
+
+            tipSelection.append(tipOption);
+        });
+
+        tipSelection.on('change', () => {
+            selectedTip = $('#tips option:selected')[0].value;
+        });
+
+        checkoutModal.append(checkoutButton);
+        checkoutModal.append('<br>');
+
+        checkoutForm.append(nameLabel);
+        checkoutForm.append(nameInput);
+        checkoutForm.append(phoneLabel);
+        checkoutForm.append(phoneInput);
+        checkoutForm.append('<br>');
+        checkoutForm.append(tipLabel);
+        checkoutForm.append(tipSelection);
+        checkoutForm.append('<br>');
+        checkoutForm.append(payButton);
+
+        checkoutModal.append(checkoutForm);
+        checkoutModal.append(backButton);
+    }
 
     function createLoginModal() {
-        const loginModal = $('<div></div>');
+        const loginModal = $('<div></div>')
+            .attr('id', 'login');
         const loginForm = createLoginForm();
         const usernameLabel = $('<label></label>').text('Username');
         const usernameInput = $('<input></input>').attr('id', 'username-input');
@@ -53,21 +101,38 @@ $(document).ready(function() {
                 }
             });
     }
+
+    function createCheckoutForm() {
+        return $('<form></form>')
+            .attr('id', 'login-form')
+            .on('submit', (e) => {
+                e.preventDefault();  
+                const name = $('#name-input')[0].value;
+                const phone = $('#phone-input')[0].value;
+                const validName = true;
+                const validPhone = true;
+                if (validName && validPhone) {
+                    console.log('cool');
+                } else {
+                    console.log('not cool');
+                }
+            });
+    }
     
     function createOrderSummary() {
-        const $orderBox = $("<div></div>")   
-        .text('Your order');
-        
+        const $orderBox = $("<div></div>");
+        const $mainText = $("<div></div>").text('Main dishes');
+        $orderBox.append($mainText)
+
         Object.keys(dataObj).forEach(item => {
             const orderItem =  $("<div></div>")   
-            .text(`${item}: ${orderObj[item].quantity}`)
+            .text(`${item}: ${mainOrderObj[item]}`)
             .attr('id', `order-item-${item}`);
             
             $orderBox.append(orderItem);
         });
         
-        let totalPrice = getTotalPrice(orderObj, dataObj);
-        
+        let totalPrice = getTotalPrice(mainOrderObj, dataObj);
         const priceDisplay = $("<div></div>")
             .attr('id', 'price-display')
             .text(`Total price: ${totalPrice}`);
@@ -86,19 +151,13 @@ $(document).ready(function() {
                 .text(item);
             let $price = $("<div></div>")
                 .text(`Price ${menuItem.price}`);
-            let $sideDishLabel = $('<label></label>')
-                .attr('for', `${item}-sideDish`)
-                .text('Select a side dish')
-            let $sideDishOptions = $('<select></select>')
-                .attr('id', `${item}-sideDish`)
-                .attr('name', `${item}-sideDish`);
             let $addButton = $("<button></button>")
                 .text('Add')
                 .on('click', () => {
-                    if (orderObj[item].quantity < menuItem.inStock) {
-                        orderObj[item].quantity += 1;
-                        $(`#order-item-${item}`).text(`${item}: ${orderObj[item].quantity}`);
-                        $('#price-display').text(`Total price: ${getTotalPrice(orderObj, dataObj)}`);
+                    if (mainOrderObj[item] < menuItem.inStock) {
+                        mainOrderObj[item] += 1;
+                        $(`#order-item-${item}`).text(`${item}: ${mainOrderObj[item]}`);
+                        $('#price-display').text(`Total price: ${getTotalPrice(mainOrderObj, dataObj)}`);
                     } else {
                         alert(`Sorry! We're all sold out of ${item}`)
                     }
@@ -106,44 +165,27 @@ $(document).ready(function() {
             let $removeButton = $("<button></button>")
                 .text('Remove')
                 .on('click', () => {
-                    if (orderObj[item].quantity > 0) {
-                        orderObj[item].quantity -= 1;
-                        $(`#order-item-${item}`).text(`${item}: ${orderObj[item].quantity}`);
-                        $('#price-display').text(`Total price: ${getTotalPrice(orderObj, dataObj)}`);
+                    if (mainOrderObj[item] > 0) {
+                        mainOrderObj[item] -= 1;
+                        $(`#order-item-${item}`).text(`${item}: ${mainOrderObj[item]}`);
+                        $('#price-display').text(`Total price: ${getTotalPrice(mainOrderObj, dataObj)}`);
                     } else {
                         alert(`You have no ${item} in your cart!`)
                     }
                 });
-
-            menuItem.sideDish.forEach(side => {
-                let sideOption = $("<option></option>")
-                    .text(side);
-
-                $($sideDishOptions).append(sideOption);
-            });
             
             $itemBox.append($foodName);
             $itemBox.append($price);
-            $itemBox.append($sideDishLabel);
-            $itemBox.append($sideDishOptions);
-            $itemBox.append('<br>');
             $itemBox.append($addButton);
             $itemBox.append($removeButton);
             $('#menu').append($itemBox);
-            
-            $(`#${item}-sideDish`).on('change', () => {
-                let selectedSide = $(`#${item}-sideDish option:selected`).text();
-                orderObj[item].sideDish = selectedSide;
-
-
-            });
         });
     }
 
     function getTotalPrice(orders, menuObj) {
         return Object.keys(orders).reduce((prev, curr) => {
             const price = menuObj[curr].price;
-            const quantity = orders[curr].quantity;
+            const quantity = orders[curr];
             prev += price * quantity;
             return prev;
         }, 0);
@@ -154,33 +196,27 @@ const getRestaurantData = () => {
     return {
         kabob: {
             inStock: 6,
-            price: 11.50,
-            sideDish: ['rice', 'salad', 'bread', 'fries']
+            price: 11.50
         },
         manto: {
             inStock: 3,
-            price: 7.25,
-            sideDish: ['salad']
+            price: 7.25
         },
         kabuli: {
             inStock: 1,
-            price: 16.80,
-            sideDish: ['salad', 'bread', 'fries']
+            price: 16.80
         },
         bolani: {
             inStock: 4,
-            price: 4.50,
-            sideDish: ['salad', 'bread', 'fries']
+            price: 4.50
         },
         bamya: {
             inStock: 0,
-            price: 12.00,
-            sideDish: ['rice', 'salad', 'bread', 'fries']
+            price: 12.00
         },
         karahi: {
             inStock: 11,
-            price: 15.50,
-            sideDish: ['rice', 'salad', 'bread', 'fries']
+            price: 15.50
         },
     }
 
