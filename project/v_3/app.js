@@ -10,7 +10,7 @@ $(document).ready(function() {
     let selectedTip = 0;
     
     $('#restaurant').hide();
-    
+
     createLoginModal()
     createOrderSummary();
     createMenu();
@@ -29,7 +29,7 @@ $(document).ready(function() {
         const nameLabel = $('<label></label>').text('Name');
         const nameInput = $('<input></input>').attr('id', 'name-input');
         const phoneLabel = $('<label></label>').text('Phone Number');
-        const phoneInput = $('<input></input>').attr('id', 'phone-input');
+        const phoneInput = $('<input></input>').attr('id', 'phone-input').attr('placeholder', '(###) ###-####');;
         const tipLabel = $('<label></label>').attr('for', 'tips'). text('Add a tip');
         const tipSelection = $('<select></select>').attr('name', 'tips').attr('id', 'tips');
         const payButton = $('<button></button>').text('Pay Now');
@@ -112,8 +112,18 @@ $(document).ready(function() {
                 const password = $('#password-input')[0].value;
                 const validUsername = username == loginCred.username;
                 const validPassword = password == loginCred.password;
+                let tryAgainText = 'Sorry!';
+                
+                if (!validUsername) {
+                    tryAgainText += ` Username "${username}" cannot be found.`
+                }
+
+                if (!validPassword) {
+                    tryAgainText += ` Password "${password}" is invalid.`
+                }
+
                 let tryAgain = $('<p></p>')
-                    .text('Sorry! You username and/or passwrd is incorrect. Please try again.')
+                    .text(tryAgainText)
                     .attr('id', 'try-again');
                 if (validUsername && validPassword) {
                     $('#try-again').remove();
@@ -133,15 +143,24 @@ $(document).ready(function() {
                 e.preventDefault();  
                 const name = $('#name-input')[0].value;
                 const phone = $('#phone-input')[0].value;
-                const validName = true;
-                const validPhone = true;
+                const validName = name != '';
+                const validPhone = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/.test(phone);
                 if (validName && validPhone) {
-                    alert('Thank you for your order!');
+                    alert(`Thank you for your order ${name}!`);
                     mainOrderObj = getNewOrderObj();
                     resetOrderDisplay();
                     $('#price-display').text(`Total price: 0`);
                 } else {
-                    console.log('bad things')
+                    let alertText = 'Oops!';
+                    if (!validName) {
+                        alertText += ' Name cannot be blank.'
+                    }
+
+                    if (!validPhone) {
+                        alertText += ' Phone number must be in valid format.'
+                    }
+
+                    alert(alertText)
                 }
             });
     }
@@ -172,6 +191,7 @@ $(document).ready(function() {
         
         $('#order').append($orderBox);
         $('#order').append(priceDisplay);
+        $('#order').append($('<br>'));
     }
     
     function createMenu() {
@@ -211,6 +231,7 @@ $(document).ready(function() {
             $itemBox.append($price);
             $itemBox.append($addButton);
             $itemBox.append($removeButton);
+            $('#menu').append($('<br>'));
             $('#menu').append($itemBox);
         });
     }
