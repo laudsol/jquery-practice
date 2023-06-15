@@ -4,25 +4,26 @@ $(document).ready(function() {
         username: 'student',
         password: '5050'
     }
-    const mainOrderObj = Object.keys(dataObj).reduce((prev, curr) => {
-        prev[curr] = 0
-        return prev;
-    }, {});
+    let mainOrderObj = getNewOrderObj();
 
-    const tipOptions = [0.05, 0.1, 0.15, 0.2, 0.25];
+    const tipOptions = [0, 0.05, 0.1, 0.15, 0.2, 0.25];
     let selectedTip = 0;
-
+    
+    $('#restaurant').hide();
+    
+    createLoginModal()
     createOrderSummary();
     createMenu();
-    createLoginModal()
     createCheckoutModal()
 
+    function getNewOrderObj() {
+        return Object.keys(dataObj).reduce((prev, curr) => {
+            prev[curr] = 0
+            return prev;
+        }, {});
+    }
+
     function createCheckoutModal() {
-        const checkoutButton = $('<button></button>')
-            .text('Checkout')
-            .on('click', () => {
-                // checkoutModal.append('<p></p>').text(`Total ${getTotalPrice(mainOrderObj, dataObj) * (1 + selectedTip)}`);
-            });
         const checkoutModal = $('#checkout');
         const checkoutForm = createCheckoutForm();
         const nameLabel = $('<label></label>').text('Name');
@@ -32,25 +33,35 @@ $(document).ready(function() {
         const tipLabel = $('<label></label>').attr('for', 'tips'). text('Add a tip');
         const tipSelection = $('<select></select>').attr('name', 'tips').attr('id', 'tips');
         const payButton = $('<button></button>').text('Pay Now');
-        const backButton = $('<button></button>').text('Back To Order');
-
+        const backButton = $('<button></button>').text('Back To Order').on('click', () => {
+            checkoutModal.hide();
+            $('#price-display').text(`Total price: ${getTotalPrice(mainOrderObj, dataObj)}`);
+            $('#menu').show();
+        });
+        
         tipOptions.forEach(tip => {
             let tipOption = $("<option></option>")
-                .attr('value', tip)
-                .text(`${tip*100}%`);
+            .attr('value', tip)
+            .text(`${tip*100}%`)
 
+            if (tip == 0) {
+                tipOption.attr('selected', 'selected');
+                selectedTip = tip;
+            }
+            
             tipSelection.append(tipOption);
         });
-
+        
         tipSelection.on('change', () => {
-            selectedTip = $('#tips option:selected')[0].value;
+            selectedTip = +$('#tips option:selected')[0].value;
+            $('#price-display').text(`Total price: ${getTotalPrice(mainOrderObj, dataObj) * (1 + selectedTip)}`);
         });
-
-        checkoutModal.append(checkoutButton);
+        
         checkoutModal.append('<br>');
-
+        
         checkoutForm.append(nameLabel);
         checkoutForm.append(nameInput);
+        checkoutForm.append('<br>');
         checkoutForm.append(phoneLabel);
         checkoutForm.append(phoneInput);
         checkoutForm.append('<br>');
@@ -58,9 +69,16 @@ $(document).ready(function() {
         checkoutForm.append(tipSelection);
         checkoutForm.append('<br>');
         checkoutForm.append(payButton);
-
+        
         checkoutModal.append(checkoutForm);
         checkoutModal.append(backButton);
+        checkoutModal.hide();
+
+        $('#checkout-button').on('click', () => {
+            $('#price-display').text(`Total price: ${getTotalPrice(mainOrderObj, dataObj) * (1 + selectedTip)}`);
+            checkoutModal.show()
+            $('#menu').hide();
+        });
     }
 
     function createLoginModal() {
@@ -94,10 +112,16 @@ $(document).ready(function() {
                 const password = $('#password-input')[0].value;
                 const validUsername = username == loginCred.username;
                 const validPassword = password == loginCred.password;
+                let tryAgain = $('<p></p>')
+                    .text('Sorry! You username and/or passwrd is incorrect. Please try again.')
+                    .attr('id', 'try-again');
                 if (validUsername && validPassword) {
-                    console.log('cool');
+                    $('#try-again').remove();
+                    $('#restaurant').show();
+                    $('#login').hide();
                 } else {
-                    console.log('not cool');
+                    $('#try-again').remove();
+                    $('#login').append(tryAgain);
                 }
             });
     }
@@ -112,16 +136,25 @@ $(document).ready(function() {
                 const validName = true;
                 const validPhone = true;
                 if (validName && validPhone) {
-                    console.log('cool');
+                    alert('Thank you for your order!');
+                    mainOrderObj = getNewOrderObj();
+                    resetOrderDisplay();
+                    $('#price-display').text(`Total price: 0`);
                 } else {
-                    console.log('not cool');
+                    console.log('bad things')
                 }
             });
+    }
+
+    function resetOrderDisplay() {
+        Object.keys(mainOrderObj).forEach(item => {
+            $(`#order-item-${item}`).text(`${item}: 0`);
+        });
     }
     
     function createOrderSummary() {
         const $orderBox = $("<div></div>");
-        const $mainText = $("<div></div>").text('Main dishes');
+        const $mainText = $("<div></div>").text('Order Summary');
         $orderBox.append($mainText)
 
         Object.keys(dataObj).forEach(item => {
@@ -137,8 +170,8 @@ $(document).ready(function() {
             .attr('id', 'price-display')
             .text(`Total price: ${totalPrice}`);
         
-        $('#menu').append($orderBox);
-        $('#menu').append(priceDisplay);
+        $('#order').append($orderBox);
+        $('#order').append(priceDisplay);
     }
     
     function createMenu() {
